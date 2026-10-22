@@ -1,4 +1,4 @@
-name = "mat3am-ordering"
+name = "restaurant"
 main = "./worker.ts"
 compatibility_date = "2026-10-22"
 

@@ -54,6 +54,13 @@ pnpm run cf:deploy
 
 اختر كلمة مرور قوية وسر جلسة عشوائياً لا يقل عن 32 حرفاً. إعداد `remote = true` خاص باتصال التطوير المحلي؛ النشر يستخدم ربط D1 المعتاد.
 
+عند ضبط Workers Builds لمستودع GitHub، اختر جذر المستودع `/` واضبط:
+
+- **Build command:** `pnpm install --frozen-lockfile && PORT=4173 BASE_PATH=/ pnpm --filter @workspace/mat3am-ordering run build`
+- **Deploy command:** `pnpm --dir artifacts/mat3am-ordering run cf:deploy`
+
+اسم Worker في `wrangler.toml` هو `restaurant` ويجب أن يطابق اسم الخدمة في Cloudflare.
+
 ## لوحة الإدارة والطلبات
 
 - صفحة الإدارة: `/admin`.
