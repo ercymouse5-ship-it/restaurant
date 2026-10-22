@@ -52,6 +52,8 @@ Thumbs.db
 
 .cache/
 .local/
+artifacts/mat3am-ordering/.dev.vars
+artifacts/mat3am-ordering/.wrangler/
 
 # Local AI / chat leftovers (not part of the app)
 .agents/

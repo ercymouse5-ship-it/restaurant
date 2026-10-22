@@ -4,9 +4,9 @@ import {
   ArrowDown, ArrowLeft, ArrowUpRight, BadgeCheck, Check, ChefHat, Clock3, Flame, MapPin,
   Instagram, Facebook, Minus, Navigation, Phone, Plus, Search, ShoppingBag, Truck, Utensils, X,
 } from 'lucide-react';
-import { getRestaurant } from './data/restaurants';
 import type { MenuItem, Restaurant } from './data/types';
 import { useCart, type CartLine } from './store/cart';
+import AdminPage from './AdminPage';
 
 type Customer = { name: string; phone: string; address: string; zone: string; payment: string };
 const CUSTOMER_KEY = 'mat3am-customer-v1';
@@ -211,7 +211,7 @@ function RestaurantPage({ restaurant }: { restaurant: Restaurant }) {
     addLine({ itemId: 'upsell-fries-drink', name: 'بطاطس ومشروب — عرض السلة', basePrice: 30, note: '', extras: [] });
     setToast('اتضاف العرض للسلة');
   };
-  const checkout = () => {
+  const checkout = async () => {
     if (!lines.length) return;
     const required = ['name', 'phone', 'address', 'zone'] as const;
     const missing = required.some((key) => !customer[key].trim());
@@ -232,8 +232,25 @@ function RestaurantPage({ restaurant }: { restaurant: Restaurant }) {
     }).join('\n');
     const message = `أهلاً ${restaurant.name}، عايز أأكد الأوردر ده:\n\n${linesText}\n\nالإجمالي قبل التوصيل: ${money(subtotal)}\nالتوصيل إلى ${customer.zone}: ${money(deliveryFee)}\nالإجمالي النهائي: ${money(subtotal + deliveryFee)}\n\nالاسم: ${customer.name}\nالموبايل: ${customer.phone}\nالعنوان: ${customer.address}\nطريقة الدفع: ${customer.payment}\n\nمستني تأكيدكم، شكراً.`;
     window.open(`https://wa.me/${restaurant.whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
-    clear();
-    setCartOpen(false);
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer,
+          zone: customer.zone,
+          payment: customer.payment,
+          items: lines.map(({ itemId, quantity, note, size, extras }) => ({
+            itemId, quantity, note, size, extras: extras.map((extra) => extra.name),
+          })),
+        }),
+      });
+      if (!response.ok) throw new Error('Order could not be saved');
+      clear();
+      setCartOpen(false);
+    } catch {
+      setToast('فتحنا واتساب، لكن تعذر حفظ الطلب في النظام. حاول مرة تانية أو كلم المطعم.');
+    }
   };
   const reorder = () => {
     try {
@@ -423,17 +440,38 @@ function CartDrawer({ restaurant, lines, subtotal, deliveryFee, minimum, offerAc
 }
 function WhatsAppMark() { return <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.4 11.8a8.4 8.4 0 0 1-12.4 7.4L3 20l.8-4.8a8.4 8.4 0 1 1 16.6-3.4Z" /><path d="M8.3 8.1c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .5.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3 0 .6.5.9 1.2 1.5 2.1 1.9.3.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.3.1.4.3.3.6-.1.5-.5 1.1-.9 1.3-.4.3-.9.4-1.5.3-1-.2-2.1-.7-3.2-1.7-1.2-1-2-2.3-2.3-3.1-.3-.8-.1-1.8.2-2.5Z" /></svg>; }
 
-function NotFound() {
-  return <main className="not-found"><span className="brand-mark"><Flame size={22} /></span><span className="eyebrow">فرن الحارة</span><h1>الصفحة دي مش موجودة</h1><p>ارجع لصفحة المطعم الرئيسية.</p><a href="/" className="gold-button">صفحة المطعم <ArrowLeft size={17} /></a></main>;
+function NotFound({ message }: { message?: string }) {
+  return <main className="not-found"><span className="brand-mark"><Flame size={22} /></span><span className="eyebrow">فرن الحارة</span><h1>{message ? 'حصلت مشكلة في الاتصال' : 'الصفحة دي مش موجودة'}</h1><p>{message || 'ارجع لصفحة المطعم الرئيسية.'}</p><a href="/" className="gold-button">صفحة المطعم <ArrowLeft size={17} /></a></main>;
 }
 
-const restaurant = getRestaurant('furn-elhara');
-
 export default function App() {
-  if (!restaurant) return <NotFound />;
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const [loadError, setLoadError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/restaurant')
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Restaurant data could not be loaded');
+        return response.json() as Promise<Restaurant>;
+      })
+      .then((data) => {
+        if (active) setRestaurant(data);
+      })
+      .catch(() => {
+        if (active) setLoadError('مش قادرين نوصل لبيانات المطعم. تأكد من إعداد Cloudflare D1 وتشغيل الـ API.');
+      });
+    return () => { active = false; };
+  }, []);
+
   return <Switch>
-    <Route path="/"><RestaurantPage restaurant={restaurant} /></Route>
-    <Route path={`/${restaurant.slug}`}><RestaurantPage restaurant={restaurant} /></Route>
+    <Route path="/admin"><AdminPage /></Route>
+    <Route path="/">
+      {restaurant ? <RestaurantPage restaurant={restaurant} /> : loadError ? <NotFound message={loadError} /> : <div className="app-loading" role="status">بنجهّز المنيو...</div>}
+    </Route>
+    <Route path="/:slug">
+      {restaurant ? <RestaurantPage restaurant={restaurant} /> : loadError ? <NotFound message={loadError} /> : <div className="app-loading" role="status">بنجهّز المنيو...</div>}
+    </Route>
     <Route><NotFound /></Route>
   </Switch>;
 }

@@ -7,6 +7,8 @@
     "dev": "vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
+    "cf:dev": "pnpm dlx wrangler dev --ip 127.0.0.1 --port 8788",
+    "cf:deploy": "pnpm dlx wrangler deploy",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
