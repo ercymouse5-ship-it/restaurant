@@ -13,8 +13,21 @@ export interface D1Database {
   batch<T = unknown>(statements: D1Statement[]): Promise<T[]>;
 }
 
+export interface R2Bucket {
+  put(
+    key: string,
+    value: ArrayBuffer,
+    options: { httpMetadata: { contentType: string; cacheControl: string } },
+  ): Promise<unknown>;
+  get(key: string): Promise<{
+    body: ReadableStream;
+    httpMetadata?: { contentType?: string };
+  } | null>;
+}
+
 export interface Env {
   DB: D1Database;
+  IMAGES: R2Bucket;
   ADMIN_PASSWORD?: string;
   ADMIN_SESSION_SECRET?: string;
 }

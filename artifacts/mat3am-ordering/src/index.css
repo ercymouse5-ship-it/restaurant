@@ -1107,6 +1107,43 @@ button { cursor: pointer; }
   grid-column: 1 / -1;
 }
 
+.admin-image-upload {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-image-upload > small {
+  color: #bcb5a8;
+  font-size: .8rem;
+}
+
+.admin-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-image-preview > img {
+  width: 92px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #25211b;
+}
+
+.admin-image-preview > label {
+  position: relative;
+  cursor: pointer;
+}
+
+.admin-image-preview input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
 .admin-checks {
   display: flex;
   align-items: end;

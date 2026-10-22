@@ -1,5 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { ArrowRight, ChefHat, ClipboardList, LogOut, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
+import { ArrowRight, ChefHat, ClipboardList, ImagePlus, LogOut, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
 import type { MenuItem, Restaurant } from './data/types';
 
 type AdminOrder = {
@@ -21,9 +21,10 @@ const orderStatuses = [
 ];
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const isFormData = typeof FormData !== 'undefined' && init?.body instanceof FormData;
   const response = await fetch(path, {
     ...init,
-    headers: { ...(init?.body ? { 'Content-Type': 'application/json' } : {}), ...init?.headers },
+    headers: { ...(init?.body && !isFormData ? { 'Content-Type': 'application/json' } : {}), ...init?.headers },
   });
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { error?: string } | null;
@@ -39,6 +40,8 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [activeTab, setActiveTab] = useState<'menu' | 'orders'>('orders');
   const [editing, setEditing] = useState<MenuItem | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -135,6 +138,44 @@ export default function AdminPage() {
     }
   };
 
+  const uploadImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
+    setError('');
+    setNotice('');
+    setUploadingImage(true);
+    try {
+      const form = new FormData();
+      form.append('image', file);
+      const result = await api<{ imageUrl: string }>('/api/admin/images', { method: 'POST', body: form });
+      setImageUrl(result.imageUrl);
+      setNotice('اترفعت الصورة. احفظ الصنف لتثبيتها في المنيو.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'تعذر رفع الصورة.');
+    } finally {
+      setUploadingImage(false);
+      input.value = '';
+    }
+  };
+
+  const startNewItem = () => {
+    setImageUrl('/hero-grill.jpg');
+    setEditing({
+      id: `item-${Date.now()}`,
+      name: '',
+      description: '',
+      price: 0,
+      category: restaurant?.categories[0]?.id || '',
+      image: '/hero-grill.jpg',
+    });
+  };
+
+  const startEditingItem = (item: MenuItem) => {
+    setImageUrl(item.image);
+    setEditing(item);
+  };
+
   const deleteItem = async (item: MenuItem) => {
     if (!restaurant || !window.confirm(`حذف ${item.name} من المنيو؟`)) return;
     setError('');
@@ -209,7 +250,7 @@ export default function AdminPage() {
         </article>)}
       </section> : <section className="admin-menu-section">
         <div className="admin-section-heading"><div><h2>أصناف المنيو</h2><p>تعديلاتك بتتحفظ مباشرة في Cloudflare D1.</p></div>
-          <button className="gold-button" onClick={() => setEditing({ id: `item-${Date.now()}`, name: '', description: '', price: 0, category: restaurant?.categories[0]?.id || '', image: '/hero-grill.jpg' })}><Plus size={17} /> صنف جديد</button>
+          <button className="gold-button" onClick={startNewItem}><Plus size={17} /> صنف جديد</button>
         </div>
         {editing && <form className="admin-item-form panel" onSubmit={saveItem}>
           <h3>{restaurant?.menu.some((item) => item.id === editing.id) ? 'تعديل الصنف' : 'إضافة صنف'}</h3>
@@ -219,16 +260,28 @@ export default function AdminPage() {
             <label className="field-label">السعر بالجنيه<input className="input-dark" name="price" type="number" min="0" step="0.01" defaultValue={editing.price} required /></label>
             <label className="field-label">القسم<select className="input-dark" name="category" defaultValue={editing.category}>{restaurant?.categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
             <label className="field-label admin-form-wide">الوصف<textarea className="input-dark" name="description" defaultValue={editing.description} rows={2} required /></label>
-            <label className="field-label admin-form-wide">مسار الصورة<input className="input-dark" name="image" defaultValue={editing.image} /></label>
+            <div className="field-label admin-form-wide admin-image-upload">
+              <span>صورة الصنف</span>
+              <div className="admin-image-preview">
+                <img src={imageUrl || '/hero-grill.jpg'} alt="معاينة صورة الصنف" />
+                <label className="outline-button">
+                  <ImagePlus size={16} />
+                  {uploadingImage ? 'جارٍ رفع الصورة...' : 'اختر صورة من الجهاز'}
+                  <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={uploadImage} disabled={uploadingImage} />
+                </label>
+              </div>
+              <input className="input-dark" name="image" value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} aria-label="رابط صورة الصنف" required />
+              <small>JPG أو PNG أو WebP أو AVIF، بحد أقصى 5 ميجابايت.</small>
+            </div>
             <label className="field-label">شارة اختيارية<input className="input-dark" name="badge" defaultValue={editing.badge || ''} /></label>
             <div className="admin-checks"><label><input type="checkbox" name="popular" defaultChecked={editing.popular} /> الأكثر طلباً</label><label><input type="checkbox" name="spicy" defaultChecked={editing.spicy} /> حار</label></div>
           </div>
-          <div className="admin-form-actions"><button className="gold-button" type="submit" disabled={busy}><Save size={16} /> حفظ الصنف</button><button type="button" className="outline-button" onClick={() => setEditing(null)}>إلغاء</button></div>
+          <div className="admin-form-actions"><button className="gold-button" type="submit" disabled={busy || uploadingImage}><Save size={16} /> حفظ الصنف</button><button type="button" className="outline-button" onClick={() => setEditing(null)}>إلغاء</button></div>
         </form>}
         <div className="admin-menu-list">{restaurant?.menu.map((item) => <article className="admin-menu-item panel" key={item.id}>
           <img src={item.image} alt="" /><div className="admin-menu-item-info"><b>{item.name}</b><span>{restaurant.categories.find((category) => category.id === item.category)?.name || item.category}</span></div>
           <strong>{item.price.toLocaleString('ar-EG')} ج.م</strong>
-          <button className="outline-button" onClick={() => setEditing(item)}>تعديل</button>
+          <button className="outline-button" onClick={() => startEditingItem(item)}>تعديل</button>
           <button className="admin-delete" aria-label={`حذف ${item.name}`} onClick={() => deleteItem(item)} disabled={busy}><Trash2 size={17} /></button>
         </article>)}</div>
       </section>}
