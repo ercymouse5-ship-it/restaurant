@@ -1,0 +1,55 @@
+Act as a senior Next.js Developer, conversion-focused UI/UX designer, and Arabic copywriter. Build a complete, production-ready Next.js project for local Egyptian restaurants: a landing page plus a digital menu with a real WhatsApp ordering flow. The goal is NOT a pretty brochure. The goal is that a visitor opens the link on their phone and places an order within 60 seconds.
+
+## 1. Tech Stack
+- Next.js 14+ (App Router, TypeScript) + Tailwind CSS, statically generated.
+- Multi-restaurant ready: each restaurant is a single config file in /data/restaurants/[slug].ts, and the page is served at /[slug] via generateStaticParams. Adding a restaurant = adding one file.
+- Cart state with Zustand, persisted to localStorage (handle hydration safely).
+- Components in /components: Header, Hero, BestSellers, Combos, MenuTabs, MenuItem, CartDrawer, StickyCartBar, WhyUs, Reviews, LocationHours, Footer, FloatingWhatsApp.
+- next/image for optimized images (allow images.unsplash.com in next.config), next/font for Cairo (body) and Tajawal or Reem Kufi (headings), dir="rtl" and lang="ar" at the root layout.
+- Dynamic metadata (Arabic title, description, Open Graph) per restaurant and Restaurant JSON-LD schema.
+- No backend. Checkout builds the Arabic WhatsApp message and opens wa.me.
+
+## 2. Language & Direction
+- Entire website in Arabic (Egyptian-friendly, warm, appetizing tone, not stiff formal Arabic).
+- Proper RTL layout everywhere (flex order, icons, carousels, spacing, use logical Tailwind classes like ms-/me-/ps-/pe-).
+- Prices in EGP ("ج.م").
+- All copy must be appetizing and specific (describe taste, texture, size), never generic like "أفضل مطعم".
+
+## 3. Restaurant Config (per restaurant file)
+name, logoText, tagline, whatsappNumber, phone, address, mapsLink, workingHours (per day), deliveryZones [{name, fee, minOrder}], estimatedDeliveryMinutes, categories, menu items (id, name, description, price, image, badge, popular, options like size/extras), combos [{name, items, price, saving}], reviews [{name, rating, text}], ordersDelivered counter, offerBanner {text, endsAt}, socialLinks, theme colors (primary, accent).
+Include one complete sample restaurant (Egyptian grill / burgers) with at least 5 categories and 20 items, so I can see everything working.
+
+## 4. Design
+- Dark luxury theme (#0f172a / #121212), gold/amber accent, subtle glassmorphism, soft glow on hover.
+- Large high-quality food photography (Unsplash URLs as placeholders, lazy loading, blur placeholder).
+- Must feel like a premium food-delivery app, not a template: big photos, generous spacing, smooth micro-animations (fade/slide on scroll), sticky header with shrink effect.
+- Mobile-first (90% of traffic is mobile). Thumb-friendly buttons (min 48px), sticky bottom action bar on mobile. Target high Lighthouse performance.
+
+## 5. Conversion features (the most important part)
+1. Live open/closed status in the header based on workingHours and visitor's time ("مفتوح الآن، بنوصل في 35 دقيقة" / "مقفول، بنفتح بكرة 12 ظهراً"). Use Africa/Cairo timezone and avoid hydration mismatch.
+2. Hero with one clear action: strong Arabic headline, one-line promise, button "اطلب دلوقتي على واتساب", trust chips (توصيل سريع, مكونات طازجة, تقييم 4.8).
+3. Real cart: add/remove items, quantity, per-item notes (مثلاً "من غير بصل"), and size/extras options.
+4. Sticky cart bar on mobile showing item count and total, opens a slide-up cart drawer.
+5. Delivery zone selector that adds the delivery fee automatically, shows minimum order warning, and final total.
+6. One-tap WhatsApp checkout: fields for customer name, phone, address (saved in localStorage for next time), payment method (كاش / فودافون كاش / انستاباي). Build a clean, organized Arabic message with itemized list, quantities, notes, subtotal, delivery fee, total, then open wa.me link using encodeURIComponent.
+7. "اطلب تاني" button for returning visitors (remembers last order).
+8. Smart menu: sticky category tabs with horizontal scroll, scroll-spy highlighting, live search box, badges ("الأكتر طلباً", "جديد", "حار", "عرض").
+9. Combos / Meal deals section with visible saving ("وفّر 40 جنيه").
+10. Upsell inside the cart: "ضيف مشروب وبطاطس بـ 30 جنيه؟".
+11. Honest urgency: "عرض اليوم" banner with a real end time from config, no fake scarcity.
+12. Social proof: review cards with names, 5 stars, short real-sounding Arabic reviews, and a "+1,200 طلب اتسلم" counter.
+13. Call button + Google Maps button in the sticky bar.
+14. Floating WhatsApp button at bottom-left (RTL), not overlapping the cart bar.
+
+## 6. Page Sections (in order)
+Header (logo, links: المنيو / عنّا / فين إحنا, order button, open/closed badge) → Offer banner → Hero → Best Sellers (horizontal scroll) → Combos → Full Menu with tabs + search → Why Us (4 cards) → Reviews → Location & Hours (map placeholder, delivery zones with fees) → Footer (social icons, phone, copyright).
+
+## 7. Code Quality
+- Clean, typed (TypeScript), commented, well-structured folders. No unnecessary libraries (only zustand, lucide-react, and Tailwind).
+- Accessible: Arabic aria-labels, good contrast, focus states, alt text.
+- No layout shift, smooth scrolling, works without a backend.
+- A root "/" page that lists available restaurants (or redirects to the sample one).
+
+## 8. Output
+Provide: the full folder structure, then every file's complete code (package.json, next.config, tailwind config, layout, pages, components, store, data, types, utils). Do not skip files or use "..." placeholders.
+End with a short Arabic guide: how to run locally (npm install, npm run dev), how to add a new restaurant (copy a file in /data/restaurants), how to change the WhatsApp number and colors, and how to deploy to Vercel for free.

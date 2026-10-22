@@ -1,10 +1,13 @@
-# [Project name]
+# مطعمك على واتساب
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+واجهة عربية متعددة المطاعم تساعد الزبائن في مصر على اختيار الطعام وإرسال طلب مرتب للمطعم عبر واتساب.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/mat3am-ordering run dev` — run the restaurant ordering app
+- `pnpm --filter @workspace/mat3am-ordering run typecheck` — typecheck the ordering app
+- `PORT=24621 BASE_PATH=/ pnpm --filter @workspace/mat3am-ordering run build` — build its static frontend
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -19,26 +22,36 @@ _Replace the heading above with the project's name, and this line with one sente
 - Validation: Zod (`zod/v4`), `drizzle-zod`
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
+- Restaurant ordering UI: React + Vite, TypeScript, Tailwind CSS, Wouter, Zustand, Lucide
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/mat3am-ordering/src/data/restaurants/` — typed restaurant configs and registry
+- `artifacts/mat3am-ordering/src/store/cart.ts` — browser-persisted cart
+- `artifacts/mat3am-ordering/src/App.tsx` and `src/index.css` — ordering experience and visual theme
+- `artifacts/mat3am-ordering/README.md` — local run, restaurant setup, and Vercel deployment guide
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- No backend is required for the ordering experience; cart and customer details stay in the visitor's browser.
+- Checkout opens a prefilled WhatsApp message; the visitor must send it to place the order.
+- Each restaurant is a typed config file registered in the restaurant index.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Arabic RTL restaurant directory and per-restaurant menu
+- Searchable categories, item customization, combos, reviews, delivery areas and hours
+- Persistent cart, saved delivery details, minimum-order validation and mobile ordering bar
+- WhatsApp checkout, reorder, call and map links
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep visitor-facing copy Arabic and Egyptian-friendly.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Sample restaurant details, contact number, offer, reviews and order count are demo data; replace them before accepting real orders.
+- Vite's build config expects `PORT` and `BASE_PATH`; set both when building outside the managed workflow.
 
 ## Pointers
 

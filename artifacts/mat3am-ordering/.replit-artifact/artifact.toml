@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "مطعمك على واتساب"
+description = "واجهة عربية RTL متعددة المطاعم لعرض قوائم الطعام وإتمام الطلبات عبر واتساب، مع سلة محفوظة واختيار مناطق التوصيل."
+version = "1.0.0"
+id = "artifacts/mat3am-ordering"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24621
+
+[services.development]
+run = "pnpm --filter @workspace/mat3am-ordering run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mat3am-ordering", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mat3am-ordering/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24621"
+BASE_PATH = "/"

@@ -1,0 +1,37 @@
+export type MenuCategory = { id: string; name: string; description?: string };
+export type MenuOption = { name: string; price: number };
+export type MenuItem = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+  badge?: string;
+  popular?: boolean;
+  spicy?: boolean;
+  sizes?: MenuOption[];
+  extras?: MenuOption[];
+};
+export type Restaurant = {
+  slug: string;
+  name: string;
+  logoText: string;
+  tagline: string;
+  description: string;
+  whatsappNumber: string;
+  phone: string;
+  address: string;
+  mapsLink: string;
+  workingHours: { day: string; open: string; close: string }[];
+  deliveryZones: { name: string; fee: number; minOrder: number }[];
+  estimatedDeliveryMinutes: number;
+  categories: MenuCategory[];
+  menu: MenuItem[];
+  combos: { id: string; name: string; description: string; items: string[]; price: number; saving: number; image: string }[];
+  reviews: { name: string; rating: number; text: string }[];
+  ordersDelivered: number;
+  offerBanner: { text: string; endsAt: string };
+  socialLinks: { instagram: string; facebook: string };
+  theme: { primary: string; accent: string };
+};
