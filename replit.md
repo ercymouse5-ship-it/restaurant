@@ -1,6 +1,6 @@
 # مطعمك على واتساب
 
-واجهة عربية متعددة المطاعم تساعد الزبائن في مصر على اختيار الطعام وإرسال طلب مرتب للمطعم عبر واتساب.
+موقع عربي RTL مستقل لمطعم فرن الحارة، يتيح للزبائن تصفح المنيو وإرسال طلباتهم للمطعم عبر واتساب.
 
 ## Run & Operate
 
@@ -26,7 +26,7 @@
 
 ## Where things live
 
-- `artifacts/mat3am-ordering/src/data/restaurants/` — typed restaurant configs and registry
+- `artifacts/mat3am-ordering/src/data/restaurants/furn-elhara.ts` — the restaurant's menu and business details
 - `artifacts/mat3am-ordering/src/store/cart.ts` — browser-persisted cart
 - `artifacts/mat3am-ordering/src/App.tsx` and `src/index.css` — ordering experience and visual theme
 - `artifacts/mat3am-ordering/README.md` — local run, restaurant setup, and Vercel deployment guide
@@ -35,11 +35,11 @@
 
 - No backend is required for the ordering experience; cart and customer details stay in the visitor's browser.
 - Checkout opens a prefilled WhatsApp message; the visitor must send it to place the order.
-- Each restaurant is a typed config file registered in the restaurant index.
+- The homepage is the restaurant site itself; there is no restaurant directory or list.
 
 ## Product
 
-- Arabic RTL restaurant directory and per-restaurant menu
+- Arabic RTL single-restaurant homepage and menu
 - Searchable categories, item customization, combos, reviews, delivery areas and hours
 - Persistent cart, saved delivery details, minimum-order validation and mobile ordering bar
 - WhatsApp checkout, reorder, call and map links

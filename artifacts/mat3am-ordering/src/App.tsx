@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Route, Switch, useLocation } from 'wouter';
+import { Route, Switch } from 'wouter';
 import {
   ArrowDown, ArrowLeft, ArrowUpRight, BadgeCheck, Check, ChefHat, Clock3, Flame, MapPin,
   Instagram, Facebook, Minus, Navigation, Phone, Plus, Search, ShoppingBag, Truck, Utensils, X,
 } from 'lucide-react';
-import { restaurants, getRestaurant } from './data/restaurants';
+import { getRestaurant } from './data/restaurants';
 import type { MenuItem, Restaurant } from './data/types';
 import { useCart, type CartLine } from './store/cart';
 
@@ -91,37 +91,7 @@ function OfferBanner({ restaurant, now }: { restaurant: Restaurant; now: Date })
   return <div className="offer-strip"><span><Flame size={15} /> {restaurant.offerBanner.text}</span><span className="offer-time"><Clock3 size={14} /> لحد {endLabel}</span></div>;
 }
 
-function RestaurantDirectory() {
-  const [, setLocation] = useLocation();
-  return <main className="directory-page">
-    <div className="directory-top container">
-      <a className="brand" href="/" aria-label="فرن الحارة"><span className="brand-mark"><Flame size={20} /></span><span>على الفحم<small>مطاعم الحارة</small></span></a>
-      <span className="directory-kicker">أكل بلدي.. بطعم البيت</span>
-    </div>
-    <section className="directory-hero container">
-      <div className="directory-copy fade-up">
-        <span className="eyebrow">مطاعم قريبة منك</span>
-        <h1>اختار أكلك.<br /><em>والباقي علينا.</em></h1>
-        <p>مشويات وسندوتشات متحضّرة على الطلب، وتوصلك سخنة لحد عندك.</p>
-        <div className="directory-trust"><span><Truck size={17} /> توصيل سريع</span><span><BadgeCheck size={17} /> طلب مباشر وآمن</span></div>
-      </div>
-      <div className="directory-image"><img src="/hero-grill.jpg" alt="مشويات مشكلة طازة من على الفحم" /></div>
-    </section>
-    <section className="container directory-list">
-      <div className="list-heading"><div><span className="eyebrow">اختيارات الحارة</span><h2 className="section-title">مطاعم بتستاهل التجربة</h2></div><span className="muted">{restaurants.length.toLocaleString('ar-EG')} مطعم متاح</span></div>
-      <div className="restaurant-list">
-        {restaurants.map((restaurant) => <button key={restaurant.slug} className="restaurant-tile panel lift" data-testid={`card-restaurant-${restaurant.slug}`} onClick={() => setLocation(`/${restaurant.slug}`)}>
-          <div className="tile-photo"><img src="/hero-grill.jpg" alt={`أطباق ${restaurant.name}`} /></div>
-          <div className="tile-copy"><span className="eyebrow">مشويات · برجر · أكل بيتي</span><h3>{restaurant.name}</h3><p>{restaurant.tagline}</p><div className="tile-meta"><span className="stars">★★★★★</span><span>٤٫٨</span><span>·</span><span>{restaurant.estimatedDeliveryMinutes} دقيقة</span></div></div>
-          <span className="tile-arrow"><ArrowLeft size={20} /></span>
-        </button>)}
-      </div>
-    </section>
-  </main>;
-}
-
 function RestaurantPage({ restaurant }: { restaurant: Restaurant }) {
-  const [location] = useLocation();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [cartOpen, setCartOpen] = useState(false);
@@ -277,7 +247,7 @@ function RestaurantPage({ restaurant }: { restaurant: Restaurant }) {
   return <div className="app-shell">
     <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="container header-inner">
-        <a className="brand" href="/" aria-label="العودة للمطاعم"><span className="brand-mark"><Flame size={20} /></span><span>{restaurant.logoText}<small>مشويات على أصولها</small></span></a>
+        <a className="brand" href="/" aria-label="العودة لصفحة المطعم"><span className="brand-mark"><Flame size={20} /></span><span>{restaurant.logoText}<small>مشويات على أصولها</small></span></a>
         <nav className="header-links desktop-only" aria-label="روابط الصفحة">
           <a href="#menu">المنيو</a><a href="#about">عنّا</a><a href="#location">فين إحنا</a>
         </nav>
@@ -384,7 +354,6 @@ function RestaurantPage({ restaurant }: { restaurant: Restaurant }) {
     {customize && <ProductDialog product={customize} selectedSize={selectedSize} setSelectedSize={setSelectedSize} selectedExtras={selectedExtras} setSelectedExtras={setSelectedExtras} note={productNote} setNote={setProductNote} onClose={() => setCustomize(null)} onAdd={() => addProduct(customize, true)} />}
     {cartOpen && <CartDrawer restaurant={restaurant} lines={lines} subtotal={subtotal} deliveryFee={deliveryFee} minimum={minimum} offerActive={offerActive} customer={customer} setCustomer={setCustomer} close={() => setCartOpen(false)} changeQuantity={changeQuantity} updateNote={updateNote} addUpsell={addUpsell} checkout={checkout} />}
     <div className="sr-only" aria-live="polite">{itemCount} عناصر في السلة</div>
-    <span className="sr-only" data-testid="text-restaurant-route">{location}</span>
   </div>;
 }
 
@@ -455,15 +424,16 @@ function CartDrawer({ restaurant, lines, subtotal, deliveryFee, minimum, offerAc
 function WhatsAppMark() { return <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20.4 11.8a8.4 8.4 0 0 1-12.4 7.4L3 20l.8-4.8a8.4 8.4 0 1 1 16.6-3.4Z" /><path d="M8.3 8.1c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .5.4l.7 1.6c.1.2.1.4-.1.6l-.5.6c-.2.2-.2.3 0 .6.5.9 1.2 1.5 2.1 1.9.3.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.3.1.4.3.3.6-.1.5-.5 1.1-.9 1.3-.4.3-.9.4-1.5.3-1-.2-2.1-.7-3.2-1.7-1.2-1-2-2.3-2.3-3.1-.3-.8-.1-1.8.2-2.5Z" /></svg>; }
 
 function NotFound() {
-  return <main className="not-found"><span className="brand-mark"><Flame size={22} /></span><span className="eyebrow">مش لاقيين الصفحة دي</span><h1>الرابط ده مش موجود عندنا</h1><p>ارجع للمطاعم واختار مكانك.</p><a href="/" className="gold-button">شوف المطاعم <ArrowLeft size={17} /></a></main>;
+  return <main className="not-found"><span className="brand-mark"><Flame size={22} /></span><span className="eyebrow">فرن الحارة</span><h1>الصفحة دي مش موجودة</h1><p>ارجع لصفحة المطعم الرئيسية.</p><a href="/" className="gold-button">صفحة المطعم <ArrowLeft size={17} /></a></main>;
 }
+
+const restaurant = getRestaurant('furn-elhara');
+
 export default function App() {
+  if (!restaurant) return <NotFound />;
   return <Switch>
-    <Route path="/" component={RestaurantDirectory} />
-    <Route path="/:slug">{(params) => {
-      const restaurant = getRestaurant(params.slug);
-      return restaurant ? <RestaurantPage key={restaurant.slug} restaurant={restaurant} /> : <NotFound />;
-    }}</Route>
+    <Route path="/"><RestaurantPage restaurant={restaurant} /></Route>
+    <Route path={`/${restaurant.slug}`}><RestaurantPage restaurant={restaurant} /></Route>
     <Route><NotFound /></Route>
   </Switch>;
 }
