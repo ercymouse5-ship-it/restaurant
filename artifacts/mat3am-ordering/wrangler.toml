@@ -11,6 +11,6 @@ run_worker_first = ["/api/*"]
 [[d1_databases]]
 binding = "DB"
 database_name = "restoos-db"
-database_id = "37e68aa1-8027-480a-8444-68fedf8626da"
+database_id = "0d67ad05-e6d5-4783-a610-2e8461cf9695"
 migrations_dir = "migrations"
 remote = true
